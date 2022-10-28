@@ -7,12 +7,21 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import axios from "axios";
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 export default function Home() {
   const Api_routes = "http://localhost:8000/api/"
   const [contactmodel, addcontactmodel] = useState(false);
   const [show, setShow] = useState(false);
   const [inputValue, setInputValue] = useState({});
   const [errors, setErrors] = useState({});
+  const [contactData, setContactData] = useState([]);
+  const [idForDelete, setIdForDelete] = useState("");
+  const [isEdit, setIsEdit] = useState(false);
+  const [idforEdit, setIdforEdit] = useState("");
+
+
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -28,11 +37,10 @@ export default function Home() {
     axios
     .get(`${Api_routes}contact/find`)
     .then((res) => {
-      console.log("data",res);
-      
+      setContactData(res?.data)
     })
     .catch((error) => {
-      alert("get data error");
+      toast.error("somthing was worng please try again!!")
     });
   }
 
@@ -45,36 +53,88 @@ export default function Home() {
     setShow(false);
   };
 
+  const validationData = () => {
+    let formIsValid = true;
+    let errors = {};
+    if (inputValue && !inputValue.Firstname) {
+      formIsValid = false;
+      errors["Firstname"] = "*please enter first name";
+    }
+    if (inputValue && !inputValue.lastname) {
+      formIsValid = false;
+      errors["lastname"] = "*please enter last name";
+    }
+    if (inputValue && !inputValue.phone) {
+      formIsValid = false;
+      errors["phone"] = "*please enter phone number";
+    }
+    setErrors(errors);
+    return formIsValid;
+  };
+
+
   const AddContact = async (e) => {
+    if(validationData()){
+
+    
     e.preventDefault();
     const payload = {
-      Firstname: inputValue?.Firstname,
+      firstname: inputValue?.Firstname,
       lastname: inputValue?.lastname,
       phone: inputValue?.phone,
     };
     axios
-    .post(`wwww`,payload)
+    .post(`${Api_routes}contact/create`,payload)
     .then((res) => {
-      alert("wsf !!!");
+      getAllContact()
+      toast.success("Contact added successfully")
+      addcontactmodel(false)
+      setInputValue({})
     })
     .catch((error) => {
-      alert("add api error");
+      toast.error("Something went wrong please try again!!!")
     });
+  }
+  };
+  const editContact = async (e) => {
+    if(validationData()){
+    e.preventDefault();
+    const payload = {
+      firstname: inputValue?.Firstname,
+      lastname: inputValue?.lastname,
+      phone: inputValue?.phone,
+    };
+    axios
+    .put(`${Api_routes}contact/update?id=${idforEdit}`,payload)
+    .then((res) => {
+      getAllContact()
+      toast.success("Contact updated successfully")
+      addcontactmodel(false)
+      setInputValue({})
+      setIdforEdit("")
+      setIsEdit(false)
+    })
+    .catch((error) => {
+      toast.error("Something went wrong please try again!!!")
+    });
+  }
   };
   const handleDeleteAnnouncement = () => {
     // Todo DELETE API
     axios
-    .delete(`delete`)
+    .delete(`${Api_routes}contact/remove?id=${idForDelete}`)
     .then((res) => {
-      alert("Data get Successfully !!!");
+      getAllContact()
+      toast.success("Contact deleted successfully...")
       setShow(false);
     })
     .catch((error) => {
-      alert("delete api error");
+      toast.error("Something went wrong please try again!!!")
     });
   };
   return (
     <>
+     <ToastContainer />
       <div className="container">
         <div className="d-flex justify-content-center pt-3 pb-5">
           <h3>
@@ -109,24 +169,48 @@ export default function Home() {
 
         <div className="mt-4">
           <ul class="list-group">
-            {[1, 2, 3, 5, 6]?.map((item) => {
+            {contactData?.map((item) => {
               return (
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                   <div>
-                    <h5>Eric Elliot</h5>
+                    <h5>{item?.firstname} {" "} {item?.lastname}</h5>
                     <span className="light-gray">
-                      <i class="fa-solid fa-phone phone-style"></i>222-555-6579
+                      <i class="fa-solid fa-phone phone-style"></i>{item?.phone}
                     </span>
                   </div>
 
-                  <button
-                    onClick={(e) => setShow(true)}
+                <div>
+                <button
+                    onClick={(e) => {
+                        setIsEdit(true)
+                        addcontactmodel(true)
+                        setIdforEdit(item?._id)
+                        setInputValue({
+                          Firstname : item?.firstname,
+                          lastname : item?.lastname,
+                          phone : item?.phone,
+                        })
+                      }}
                     type="button"
-                    class="btn btn-danger"
+                    className="btn btn-success"
+                  >
+                    <i className="fa-regular fa-pen-to-square"></i>
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                        setShow(true)
+                        setIdForDelete(item?._id)
+                      }}
+                    type="button"
+                    className="btn btn-danger"
                   >
                     {" "}
                     <i class="fa fa-trash" aria-hidden="true"></i>
                   </button>
+
+                  
+                  </div>
                 </li>
               );
             })}
@@ -192,6 +276,16 @@ export default function Home() {
                         }}
                       />
                     </div>
+                    <span
+                      style={{
+                        color: "red",
+                        top: "5px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {errors["Firstname"]}
+                    </span>
+
                   </div>
                 </div>
 
@@ -212,6 +306,15 @@ export default function Home() {
                         }}
                       />
                     </div>
+                    <span
+                      style={{
+                        color: "red",
+                        top: "5px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {errors["lastname"]}
+                    </span>
                   </div>
                 </div>
 
@@ -232,15 +335,24 @@ export default function Home() {
                         }}
                       />
                     </div>
+                    <span
+                      style={{
+                        color: "red",
+                        top: "5px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {errors["phone"]}
+                    </span>
                   </div>
                 </div>
 
                 <div className="d-flex align-items-center justify-content-center">
                   <button
-                    onClick={(e) => AddContact(e)}
+                    onClick={(e) => isEdit ? editContact(e) :  AddContact(e)}
                     className="btn  btn-success mt-5"
                   >
-                    <span>Add Contact</span>
+                    <span>{isEdit ? "Edit" : "Add"} Contact</span>
                   </button>
                 </div>
               </List>
