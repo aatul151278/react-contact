@@ -7,21 +7,20 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import axios from "axios";
 
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Home() {
-  const Api_routes = "http://localhost:8000/api/"
+  const Api_routes = "http://localhost:8000/api/";
   const [contactmodel, addcontactmodel] = useState(false);
   const [show, setShow] = useState(false);
   const [inputValue, setInputValue] = useState({});
   const [errors, setErrors] = useState({});
   const [contactData, setContactData] = useState([]);
   const [idForDelete, setIdForDelete] = useState("");
+  const [search, setSearch] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [idforEdit, setIdforEdit] = useState("");
-
-
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -30,22 +29,25 @@ export default function Home() {
   };
 
   useEffect(() => {
-    getAllContact()
-  },[])
+    getAllContact();
+  }, []);
 
-  const getAllContact = ()=> {
+  const getAllContact = () => {
     axios
-    .get(`${Api_routes}contact/find`)
-    .then((res) => {
-      setContactData(res?.data)
-    })
-    .catch((error) => {
-      toast.error("somthing was worng please try again!!")
-    });
-  }
-
+      .get(`${Api_routes}contact/find`)
+      .then((res) => {
+        setContactData(res?.data);
+      })
+      .catch((error) => {
+        toast.error("somthing was worng please try again!!");
+      });
+  };
 
   const handleContactmodal = () => {
+    setInputValue({});
+    setIdforEdit("");
+    setErrors({});
+    setIsEdit(false);
     addcontactmodel(!contactmodel);
   };
 
@@ -72,69 +74,72 @@ export default function Home() {
     return formIsValid;
   };
 
-
   const AddContact = async (e) => {
-    if(validationData()){
-
-    
-    e.preventDefault();
-    const payload = {
-      firstname: inputValue?.Firstname,
-      lastname: inputValue?.lastname,
-      phone: inputValue?.phone,
-    };
-    axios
-    .post(`${Api_routes}contact/create`,payload)
-    .then((res) => {
-      getAllContact()
-      toast.success("Contact added successfully")
-      addcontactmodel(false)
-      setInputValue({})
-    })
-    .catch((error) => {
-      toast.error("Something went wrong please try again!!!")
-    });
-  }
+    if (validationData()) {
+      e.preventDefault();
+      const payload = {
+        firstname: inputValue?.Firstname,
+        lastname: inputValue?.lastname,
+        phone: inputValue?.phone,
+      };
+      axios
+        .post(`${Api_routes}contact/create`, payload)
+        .then((res) => {
+          getAllContact();
+          toast.success("Contact added successfully");
+          addcontactmodel(false);
+          setInputValue({});
+        })
+        .catch((error) => {
+          toast.error("Something went wrong please try again!!!");
+        });
+    }
   };
+
   const editContact = async (e) => {
-    if(validationData()){
-    e.preventDefault();
-    const payload = {
-      firstname: inputValue?.Firstname,
-      lastname: inputValue?.lastname,
-      phone: inputValue?.phone,
-    };
-    axios
-    .put(`${Api_routes}contact/update?id=${idforEdit}`,payload)
-    .then((res) => {
-      getAllContact()
-      toast.success("Contact updated successfully")
-      addcontactmodel(false)
-      setInputValue({})
-      setIdforEdit("")
-      setIsEdit(false)
-    })
-    .catch((error) => {
-      toast.error("Something went wrong please try again!!!")
-    });
-  }
+    if (validationData()) {
+      e.preventDefault();
+      const payload = {
+        firstname: inputValue?.Firstname,
+        lastname: inputValue?.lastname,
+        phone: inputValue?.phone,
+      };
+      axios
+        .put(`${Api_routes}contact/update?id=${idforEdit}`, payload)
+        .then((res) => {
+          getAllContact();
+          toast.success("Contact updated successfully");
+          addcontactmodel(false);
+          setInputValue({});
+          setIdforEdit("");
+          setIsEdit(false);
+        })
+        .catch((error) => {
+          toast.error("Something went wrong please try again!!!");
+        });
+    }
   };
   const handleDeleteAnnouncement = () => {
     // Todo DELETE API
     axios
-    .delete(`${Api_routes}contact/remove?id=${idForDelete}`)
-    .then((res) => {
-      getAllContact()
-      toast.success("Contact deleted successfully...")
-      setShow(false);
-    })
-    .catch((error) => {
-      toast.error("Something went wrong please try again!!!")
-    });
+      .delete(`${Api_routes}contact/remove?id=${idForDelete}`)
+      .then((res) => {
+        getAllContact();
+        toast.success("Contact deleted successfully...");
+        setShow(false);
+      })
+      .catch((error) => {
+        toast.error("Something went wrong please try again!!!");
+      });
   };
+
+  const OnSearchChange = (e) => {
+    setSearch(e.target.value?.toLowerCase());
+  };
+
   return (
     <>
-     <ToastContainer />
+      <ToastContainer />
       <div className="container">
         <div className="d-flex justify-content-center pt-3 pb-5">
           <h3>
@@ -148,7 +153,7 @@ export default function Home() {
           <button
             onClick={(e) => handleContactmodal()}
             type="button"
-            class="btn btn-primary"
+            className="btn btn-primary"
           >
             + Add Contact
           </button>
@@ -157,59 +162,65 @@ export default function Home() {
         <div className="mt-4">
           <form>
             <div className="form-group " id="input-container">
-              <i class="fa-solid fa-magnifying-glass"></i>
+              <i className="fa-solid fa-magnifying-glass"></i>
               <input
                 type="text"
                 className="form-control"
-                placeholder="Search for contact by last name..."
+                onChange={(e) => OnSearchChange(e)}
+                placeholder="Search for contact by name..."
               />
             </div>
           </form>
         </div>
 
         <div className="mt-4">
-          <ul class="list-group">
+          <ul className="list-group">
             {contactData?.map((item) => {
+              if(search !="" && (item?.firstname?.toLowerCase().indexOf(search) == -1  && item.lastname?.toLowerCase().indexOf(search) == -1 )){
+                return null;
+              }
+
               return (
-                <li class="list-group-item d-flex justify-content-between align-items-center">
+                <li className="list-group-item d-flex justify-content-between align-items-center" key={item._id}>
                   <div>
-                    <h5>{item?.firstname} {" "} {item?.lastname}</h5>
+                    <h5>
+                      {item?.firstname} {item?.lastname}
+                    </h5>
                     <span className="light-gray">
-                      <i class="fa-solid fa-phone phone-style"></i>{item?.phone}
+                      <i className="fa-solid fa-phone phone-style"></i>
+                      {item?.phone}
                     </span>
                   </div>
 
-                <div>
-                <button
-                    onClick={(e) => {
-                        setIsEdit(true)
-                        addcontactmodel(true)
-                        setIdforEdit(item?._id)
+                  <div>
+                    <button
+                      onClick={(e) => {
+                        setIsEdit(true);
+                        addcontactmodel(true);
+                        setIdforEdit(item?._id);
                         setInputValue({
-                          Firstname : item?.firstname,
-                          lastname : item?.lastname,
-                          phone : item?.phone,
-                        })
+                          Firstname: item?.firstname,
+                          lastname: item?.lastname,
+                          phone: item?.phone,
+                        });
                       }}
-                    type="button"
-                    className="btn btn-success"
-                  >
-                    <i className="fa-regular fa-pen-to-square"></i>
-                  </button>
+                      type="button"
+                      className="btn btn-success"
+                    >
+                      <i className="fa-regular fa-pen-to-square"></i>
+                    </button>
 
-                  <button
-                    onClick={(e) => {
-                        setShow(true)
-                        setIdForDelete(item?._id)
+                    <button
+                      onClick={(e) => {
+                        setShow(true);
+                        setIdForDelete(item?._id);
                       }}
-                    type="button"
-                    className="btn btn-danger"
-                  >
-                    {" "}
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                  </button>
-
-                  
+                      type="button"
+                      className="btn btn-danger"
+                    >
+                      {" "}
+                      <i className="fa fa-trash" aria-hidden="true"></i>
+                    </button>
                   </div>
                 </li>
               );
@@ -285,7 +296,6 @@ export default function Home() {
                     >
                       {errors["Firstname"]}
                     </span>
-
                   </div>
                 </div>
 
@@ -349,10 +359,10 @@ export default function Home() {
 
                 <div className="d-flex align-items-center justify-content-center">
                   <button
-                    onClick={(e) => isEdit ? editContact(e) :  AddContact(e)}
+                    onClick={(e) => (isEdit ? editContact(e) : AddContact(e))}
                     className="btn  btn-success mt-5"
                   >
-                    <span>{isEdit ? "Edit" : "Add"} Contact</span>
+                    <span>{isEdit ? "Update" : "Add"} Contact</span>
                   </button>
                 </div>
               </List>
