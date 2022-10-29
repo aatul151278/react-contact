@@ -9,7 +9,7 @@ app.get("/*", function (req, res) {
   res.sendFile(path.join(__dirname + "/build/index.html"));
 });
 
-var port = process.env.PORT || 5005;
+var port = process.env.PORT || 8005;
 
 app.listen(port, function () {
   console.log("Front started", port);
