@@ -2,6 +2,9 @@
   "name": "react-frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "16.16.01"
+  },
   "dependencies": {
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
