@@ -28,7 +28,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "postinstall":"heroku config:set legacy-peer-deps=true --app=client-list-data-front",
-    "heroku-postbuild": "npm config set legacy-peer-deps true && npm install --legacy-peer-deps"
+    "heroku-prebuild": "npm config set legacy-peer-deps true && npm install --legacy-peer-deps"
   },
   "eslintConfig": {
     "extends": [
