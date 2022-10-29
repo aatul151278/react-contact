@@ -24,7 +24,6 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "heroku-postbuild": "npm config set legacy-peer-deps true && npm install --legacy-peer-deps",
     "start": "node server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
