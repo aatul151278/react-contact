@@ -15,7 +15,6 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.26.1",
     "bootstrap": "^5.1.3",
-    "dotenv": "^16.0.3",
     "react": "^18.0.0",
     "react-bootstrap": "^2.2.2",
     "react-dom": "^18.0.0",
@@ -25,7 +24,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "heroku-postbuild-demo": "npm config set legacy-peer-deps true && npm install --legacy-peer-deps",
+    "heroku-postbuild": "npm config set legacy-peer-deps true && npm install --legacy-peer-deps",
     "start": "node server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
