@@ -9,3 +9,6 @@ React application to manage contact list, user can add new contact, edit existin
 	
 	Start react application
 	-> npm run start
+
+# Demo 
+	you can see live [demo](https://client-list-data-front.herokuapp.com) here
