@@ -13,7 +13,6 @@ React application to manage contact list, user can add new contact, edit existin
 # Demo 
 you can see live [demo](https://client-list-data-front.herokuapp.com) here
 
-## view
 ![Capture](https://user-images.githubusercontent.com/95575992/199279922-d9e590d2-26c1-4095-a69b-9541956b92de.PNG)
 
 
